@@ -1,9 +1,14 @@
-scSATySFi
-=========
+![logo1](https://raw.githubusercontent.com/zr-tex8r/scsatysfi/images/scsatysfi-logo.png)
 
-SC-variant of the typesetting software SATySFi
+![Snowman Status](https://raw.githubusercontent.com/zr-tex8r/scsatysfi/images/snowman-nice-green.png)
 
-NB. It is *essential*.
+## Summary of scSATySFi
+
+[日本語でおｋ](./README-ja.md)
+
+## License
+
+This software is distributed under the MIT License.
 
 --------------------
 Takayuki YATO (aka. "ZR")  
