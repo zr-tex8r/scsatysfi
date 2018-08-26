@@ -24,7 +24,7 @@ func byteCompile(value scValue) scByteCode {
 
 func byteExec(bcode scByteCode) {
 	if bytes.Equal(bcode.code, codeDoEssential) {
-		writePdf(outFile)
+		writeOutput(outFile)
 	} else {
 		scePanic(errors.New("bad bytecode"))
 	}

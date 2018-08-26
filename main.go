@@ -11,12 +11,14 @@ import (
 	"github.com/zr-tex8r/scpdf"
 	"github.com/zr-tex8r/xcolor"
 	"image/color"
+	"io"
 	"os"
+	"strings"
 )
 
 const (
 	progName = "scSATySFi"
-	version  = "0.8.8"
+	version  = "0.8.18-pre1"
 )
 
 const dfltMuffler = "cmyk:red,1"
@@ -31,6 +33,8 @@ var (
 	typeCheckOnly  bool
 	byteComp       bool
 	mufflerColor   color.Color
+	textModeVal    string
+	textMode       string
 )
 
 func showVersion(string) error {
@@ -51,6 +55,7 @@ var argSpecList = []argInfo{
 	argInfo{"--type-check-only", argBool, argSetBool(&typeCheckOnly), " Stops after type checking"},
 	argInfo{"-b", argBool, argSetBool(&byteComp), " Use bytecode compiler"},
 	argInfo{"--bytecomp", argBool, argSetBool(&byteComp), " Use bytecode compiler"},
+	argInfo{"--text-mode", argStr, argSetStr(&textModeVal), " Set text mode"},
 	argInfo{"--muffler", argStr, argSetStr(&mufflerVal), " Specify muffler color"},
 }
 
@@ -67,6 +72,13 @@ func readArg() {
 	}
 	if mufflerVal == "" {
 		mufflerVal = dfltMuffler
+	}
+	if textModeVal != "" {
+		vals := strings.Split(textModeVal, ",")
+		if len(vals) > 1 {
+			scePanic(errors.New("--text-mode can have only one value."))
+		}
+		textMode = strings.TrimSpace(vals[0])
 	}
 	var err error
 	if mufflerColor, err = xcolor.GoColor(mufflerVal); err != nil {
@@ -96,8 +108,35 @@ func main() {
 	if byteComp {
 		byteExec(byteCompile(value))
 	} else {
-		writePdf(outFile)
+		writeOutput(outFile)
 	}
+}
+
+func writeOutput(pdst string) {
+	switch textMode {
+	case "":
+		writePdf(pdst)
+	case "plain":
+		writeText(pdst, makePlainText())
+	case "html":
+		writeText(pdst, makeHtmlText())
+	case "xml":
+		writeText(pdst, makeXmlText())
+	default:
+		scePanic(fmt.Errorf("unknown text mode value '%s'", textMode))
+	}
+
+	fmt.Printf(" ---- ---- ---- ----\n")
+	fmt.Printf("  output written on '%s'.\n", ordPath(pdst))
+}
+
+func writeText(pdst, text string) {
+	wdst, err := os.Create(pdst)
+	sceAssert(err)
+	defer wdst.Close()
+
+	_, err = io.WriteString(wdst, text)
+	sceAssert(err)
 }
 
 func writePdf(ppdf string) {
@@ -116,9 +155,6 @@ func writePdf(ppdf string) {
 	doc.AddPage(mufflerColor)
 	_, err = doc.WriteTo(wpdf)
 	sceAssert(err)
-
-	fmt.Printf(" ---- ---- ---- ----\n")
-	fmt.Printf("  output written on '%s'.\n", ordPath(ppdf))
 }
 
 func readFile(psrc string, value scValue) {
