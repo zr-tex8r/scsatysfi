@@ -36,3 +36,11 @@ func changeExt(path, ext string) string {
 	s := path[:len(path)-len(filepath.Ext(path))]
 	return s + ext
 }
+
+//--------nullWriter
+
+type nullWriter struct{}
+
+func (w *nullWriter) Write(p []byte) (n int, err error) {
+	return len(p), nil
+}

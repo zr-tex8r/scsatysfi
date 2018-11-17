@@ -35,6 +35,8 @@ var (
 	mufflerColor   color.Color
 	textModeVal    string
 	textMode       string
+	markdownVal    string
+	isMarkdown     bool
 )
 
 func showVersion(string) error {
@@ -56,6 +58,7 @@ var argSpecList = []argInfo{
 	argInfo{"-b", argBool, argSetBool(&byteComp), " Use bytecode compiler"},
 	argInfo{"--bytecomp", argBool, argSetBool(&byteComp), " Use bytecode compiler"},
 	argInfo{"--text-mode", argStr, argSetStr(&textModeVal), " Set text mode"},
+	argInfo{"--markdown", argStr, argSetStr(&markdownVal), " Pass Markdown source as input"},
 	argInfo{"--muffler", argStr, argSetStr(&mufflerVal), " Specify muffler color"},
 }
 
@@ -79,6 +82,9 @@ func readArg() {
 			scePanic(errors.New("--text-mode can have only one value."))
 		}
 		textMode = strings.TrimSpace(vals[0])
+	}
+	if markdownVal != "" {
+		isMarkdown = true
 	}
 	var err error
 	if mufflerColor, err = xcolor.GoColor(mufflerVal); err != nil {
@@ -173,7 +179,11 @@ func parseFile(psrc string) (value scValue) {
 	rsrc, err := os.Open(psrc)
 	sceAssert(err)
 	defer rsrc.Close()
-	value, err = scParseReader(rsrc)
+	if isMarkdown {
+		value, err = scParseMarkdown(rsrc)
+	} else {
+		value, err = scParseReader(rsrc)
+	}
 	sceAssert(err)
 	return
 }
