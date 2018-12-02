@@ -6,19 +6,21 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/zr-tex8r/scpdf"
 	"github.com/zr-tex8r/xcolor"
 	"image/color"
 	"io"
+	"io/ioutil"
 	"os"
 	"strings"
 )
 
 const (
 	progName = "scSATySFi"
-	version  = "0.8.28"
+	version  = "0.8.38"
 )
 
 const dfltMuffler = "cmyk:red,1"
@@ -37,6 +39,7 @@ var (
 	textMode       string
 	markdownVal    string
 	isMarkdown     bool
+	evalVal        string
 )
 
 func showVersion(string) error {
@@ -59,6 +62,7 @@ var argSpecList = []argInfo{
 	argInfo{"--bytecomp", argBool, argSetBool(&byteComp), " Use bytecode compiler"},
 	argInfo{"--text-mode", argStr, argSetStr(&textModeVal), " Set text mode"},
 	argInfo{"--markdown", argStr, argSetStr(&markdownVal), " Pass Markdown source as input"},
+	argInfo{"--eval", argStr, argSetStr(&evalVal), " Give one line of source text"},
 	argInfo{"--muffler", argStr, argSetStr(&mufflerVal), " Specify muffler color"},
 }
 
@@ -67,11 +71,19 @@ func readArg() {
 		inFile = arg
 		return nil
 	})
-	if inFile == "" {
+	if inFile == "" && evalVal == "" {
 		scePanic(errors.New("no input file designation."))
+	} else if inFile == "" && evalVal != "" {
+		inFile = "(eval)"
+	} else if inFile != "" && evalVal != "" {
+		scePanic(errors.New("both input file and --eval are given."))
 	}
 	if outFile == "" {
-		outFile = changeExt(inFile, ".pdf")
+		if evalVal == "" {
+			outFile = changeExt(inFile, ".pdf")
+		} else {
+			outFile = "output.pdf"
+		}
 	}
 	if mufflerVal == "" {
 		mufflerVal = dfltMuffler
@@ -165,7 +177,7 @@ func writePdf(ppdf string) {
 
 func readFile(psrc string, value scValue) {
 	fmt.Printf(" ---- ---- ---- ----\n")
-	fmt.Printf("  reading '%s' ...\n", ordPath(psrc))
+	fmt.Printf("  reading '%s' ...\n", ordInPath(psrc))
 	fmt.Printf("  type check passed. (%s)\n", value.vtype)
 
 	if !typeCheckOnly && value.vtype != scEssential {
@@ -173,10 +185,18 @@ func readFile(psrc string, value scValue) {
 	}
 }
 
-func parseFile(psrc string) (value scValue) {
-	fmt.Printf("  parsing '%s' ...\n", ordPath(psrc))
+func openInFile(psrc string) (io.ReadCloser, error) {
+	if evalVal == "" {
+		return os.Open(psrc)
+	}
+	buf := bytes.NewBuffer([]byte(evalVal))
+	return ioutil.NopCloser(buf), nil
+}
 
-	rsrc, err := os.Open(psrc)
+func parseFile(psrc string) (value scValue) {
+	fmt.Printf("  parsing '%s' ...\n", ordInPath(psrc))
+
+	rsrc, err := openInFile(psrc)
 	sceAssert(err)
 	defer rsrc.Close()
 	if isMarkdown {

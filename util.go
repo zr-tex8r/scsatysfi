@@ -27,9 +27,22 @@ func natFullPath(path string) string {
 func ordPath(path string) string {
 	if fullPath {
 		return natFullPath(path)
-	} else {
-		return filepath.Base(path)
 	}
+	return filepath.Base(path)
+}
+
+func ordInPath(path string) string {
+	if fullPath && evalVal == "" {
+		return natFullPath(path)
+	}
+	return filepath.Base(path)
+}
+
+func fullInPath(path string) string {
+	if evalVal == "" {
+		return natFullPath(path)
+	}
+	return path
 }
 
 func changeExt(path, ext string) string {

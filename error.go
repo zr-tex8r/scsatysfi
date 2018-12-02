@@ -67,7 +67,7 @@ func sceBadCharError(line, bcol, ecol int, chr rune) error {
 func sceNonDocError(path string, vt scVType) error {
 	msg := fmt.Sprintf(
 		"file '%v' is not an essential file; it is of type\n      %v",
-		natFullPath(path), vt)
+		fullInPath(path), vt)
 	return &sceError{sceTypeTag, msg}
 }
 
