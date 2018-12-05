@@ -1,4 +1,6 @@
 github.com/zr-tex8r/scpdf v0.8.2 h1:1sKmo9nLJYBTtFE0U91dIfrhJEC1KmU2sUlz09a85/o=
 github.com/zr-tex8r/scpdf v0.8.2/go.mod h1:21U+8Qnl2FDvqZnBH1LjYTEISHxyXnaOw1XpmUFlA94=
+github.com/zr-tex8r/scpdf v0.18.0 h1:o6NKkV+eA0mdlS9O/4JyTI15ZcmhoryK2x7+RVL9uAU=
+github.com/zr-tex8r/scpdf v0.18.0/go.mod h1:21U+8Qnl2FDvqZnBH1LjYTEISHxyXnaOw1XpmUFlA94=
 github.com/zr-tex8r/xcolor v0.2.2 h1:+1p1NxfuzSe/JcruZYhfY1DpUSf6hPZ5AlXks1xp/I8=
 github.com/zr-tex8r/xcolor v0.2.2/go.mod h1:9ZrFUW6UmXYTEpU62TOW6PXMZtyUQEzcvyI1UAbVhsM=
