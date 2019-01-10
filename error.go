@@ -64,6 +64,11 @@ func sceBadCharError(line, bcol, ecol int, chr rune) error {
 	return &sceError{sceSynTag, scePosDesc(line, bcol, ecol, msg)}
 }
 
+func sceBadCommentError(line int) error {
+	msg := fmt.Sprintf("text input ended while reading a block comment")
+	return &sceError{sceSynTag, scePosDesc(line, 0, 0, msg)}
+}
+
 func sceNonDocError(path string, vt scVType) error {
 	msg := fmt.Sprintf(
 		"file '%v' is not an essential file; it is of type\n      %v",
