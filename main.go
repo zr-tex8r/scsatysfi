@@ -20,7 +20,7 @@ import (
 
 const (
 	progName = "scSATySFi"
-	version  = "0.8.38"
+	version  = "0.8.48"
 )
 
 const dfltMuffler = "cmyk:red,1"
