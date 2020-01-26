@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Takayuki YATO (aka. "ZR")
+// Copyright (c) 2018-2020 Takayuki YATO (aka. "ZR")
 //   GitHub:   https://github.com/zr-tex8r
 //   Twitter:  @zr_tex8r
 // Distributed under the MIT License.
@@ -9,37 +9,42 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/zr-tex8r/scpdf"
-	"github.com/zr-tex8r/xcolor"
 	"image/color"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/zr-tex8r/scpdf"
+	"github.com/zr-tex8r/xcolor"
 )
 
 const (
 	progName = "scSATySFi"
-	version  = "0.8.48"
+	version  = "0.8.58"
 )
 
 const dfltMuffler = "cmyk:red,1"
 
 var (
-	inFile         string
-	outFile        string
-	fullPath       bool
-	mufflerVal     string
-	debugShowBbox  bool
-	debugShowSpace bool
-	typeCheckOnly  bool
-	byteComp       bool
-	mufflerColor   color.Color
-	textModeVal    string
-	textMode       string
-	markdownVal    string
-	isMarkdown     bool
-	evalVal        string
+	inFile              string
+	outFile             string
+	fullPath            bool
+	mufflerVal          string
+	debugShowBbox       bool
+	debugShowSpace      bool
+	debugShowBlockBbox  bool
+	debugShowBlockSpace bool
+	typeCheckOnly       bool
+	byteComp            bool
+	mufflerColor        color.Color
+	textModeVal         string
+	textMode            string
+	markdownVal         string
+	isMarkdown          bool
+	evalVal             string
+	isShowFont          bool
+	config              string
 )
 
 func showVersion(string) error {
@@ -51,17 +56,27 @@ func showVersion(string) error {
 var argSpecList = []argInfo{
 	argInfo{"-o", argStr, argSetStr(&outFile), " Specify output file"},
 	argInfo{"--output", argStr, argSetStr(&outFile), " Specify output file"},
-	argInfo{"-v", argVoid, showVersion, " Print version"},
-	argInfo{"--version", argVoid, showVersion, " Print version"},
-	argInfo{"--full-path", argBool, argSetBool(&fullPath), " Display paths in full-path style"},
-	argInfo{"--debug-show-bbox", argBool, argSetBool(&debugShowBbox), " Output bounding boxes for glyphs"},
-	argInfo{"--debug-show-space", argBool, argSetBool(&debugShowSpace), " Output boxes for spaces"},
+	argInfo{"-v", argVoid, showVersion, " Prints version"},
+	argInfo{"--version", argVoid, showVersion, " Prints version"},
+	argInfo{"--full-path", argBool, argSetBool(&fullPath), " Displays paths in full-path style"},
+	// But there is no such inessential thing as glyph
+	argInfo{"--debug-show-bbox", argBool, argSetBool(&debugShowBbox), " Outputs bounding boxes for glyphs"},
+	// But there is no such inessential thing as space
+	argInfo{"--debug-show-space", argBool, argSetBool(&debugShowSpace), " Outputs boxes for spaces"},
+	// Again...
+	argInfo{"--debug-show-block-bbox", argBool, argSetBool(&debugShowBlockBbox), " Outputs bounding boxes for blocks"},
+	argInfo{"--debug-show-block-space", argBool, argSetBool(&debugShowBlockSpace), " Outputs visualized block spaces"},
 	argInfo{"-t", argBool, argSetBool(&typeCheckOnly), " Stops after type checking"},
 	argInfo{"--type-check-only", argBool, argSetBool(&typeCheckOnly), " Stops after type checking"},
 	argInfo{"-b", argBool, argSetBool(&byteComp), " Use bytecode compiler"},
 	argInfo{"--bytecomp", argBool, argSetBool(&byteComp), " Use bytecode compiler"},
 	argInfo{"--text-mode", argStr, argSetStr(&textModeVal), " Set text mode"},
 	argInfo{"--markdown", argStr, argSetStr(&markdownVal), " Pass Markdown source as input"},
+	// But there is no such inessential thing as font
+	argInfo{"--show-fonts", argBool, argSetBool(&isShowFont), " Displays all the available fonts"},
+	// But there is no such inessential thing as config
+	argInfo{"-C", argStr, argSetStr(&config), " Add colon-separated paths to configuration search path"},
+	argInfo{"--config", argStr, argSetStr(&config), " Add colon-separated paths to configuration search path"},
 	argInfo{"--eval", argStr, argSetStr(&evalVal), " Give one line of source text"},
 	argInfo{"--muffler", argStr, argSetStr(&mufflerVal), " Specify muffler color"},
 }
@@ -121,6 +136,12 @@ func main() {
 
 	fmt.Printf(" ---- ---- ---- ----\n")
 	fmt.Printf("  evaluating texts ...\n")
+
+	if isShowFont {
+		fmt.Printf("  all the available fonts:")
+		fmt.Printf("  ...oops, there's no such inessential concept as font!")
+	}
+
 	fmt.Printf("  evaluation done.\n")
 
 	if byteComp {
