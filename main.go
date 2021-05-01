@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2020 Takayuki YATO (aka. "ZR")
+// Copyright (c) 2018-2021 Takayuki YATO (aka. "ZR")
 //   GitHub:   https://github.com/zr-tex8r
 //   Twitter:  @zr_tex8r
 // Distributed under the MIT License.
@@ -21,7 +21,7 @@ import (
 
 const (
 	progName = "scSATySFi"
-	version  = "0.8.58"
+	version  = "0.8.68"
 )
 
 const dfltMuffler = "cmyk:red,1"

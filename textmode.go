@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Takayuki YATO (aka. "ZR")
+// Copyright (c) 2018-2021 Takayuki YATO (aka. "ZR")
 //   GitHub:   https://github.com/zr-tex8r
 //   Twitter:  @zr_tex8r
 // Distributed under the MIT License.
