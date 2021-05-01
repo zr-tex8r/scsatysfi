@@ -35,6 +35,7 @@ var (
 	debugShowSpace      bool
 	debugShowBlockBbox  bool
 	debugShowBlockSpace bool
+	debugShowOverfull   bool
 	typeCheckOnly       bool
 	byteComp            bool
 	mufflerColor        color.Color
@@ -45,6 +46,8 @@ var (
 	evalVal             string
 	isShowFont          bool
 	config              string
+	noDefaultConfig     bool
+	pageNumberLimit     string
 )
 
 func showVersion(string) error {
@@ -66,6 +69,7 @@ var argSpecList = []argInfo{
 	// Again...
 	argInfo{"--debug-show-block-bbox", argBool, argSetBool(&debugShowBlockBbox), " Outputs bounding boxes for blocks"},
 	argInfo{"--debug-show-block-space", argBool, argSetBool(&debugShowBlockSpace), " Outputs visualized block spaces"},
+	argInfo{"--debug-show-overfull", argBool, argSetBool(&debugShowOverfull), " Outputs visualized overfull or underfull lines"},
 	argInfo{"-t", argBool, argSetBool(&typeCheckOnly), " Stops after type checking"},
 	argInfo{"--type-check-only", argBool, argSetBool(&typeCheckOnly), " Stops after type checking"},
 	argInfo{"-b", argBool, argSetBool(&byteComp), " Use bytecode compiler"},
@@ -77,6 +81,10 @@ var argSpecList = []argInfo{
 	// But there is no such inessential thing as config
 	argInfo{"-C", argStr, argSetStr(&config), " Add colon-separated paths to configuration search path"},
 	argInfo{"--config", argStr, argSetStr(&config), " Add colon-separated paths to configuration search path"},
+	// Again...
+	argInfo{"--no-default-config", argBool, argSetBool(&noDefaultConfig), " Does not use default configuration search path"},
+	// How does it work?
+	argInfo{"--page-number-limit", argStr, argSetStr(&pageNumberLimit), " Set the page number limit (default: 10000)"},
 	argInfo{"--eval", argStr, argSetStr(&evalVal), " Give one line of source text"},
 	argInfo{"--muffler", argStr, argSetStr(&mufflerVal), " Specify muffler color"},
 }
