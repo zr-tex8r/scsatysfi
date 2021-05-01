@@ -47,10 +47,10 @@ var (
 	isShowFont          bool
 	config              string
 	noDefaultConfig     bool
-	pageNumberLimit     string
+	pageNumberLimit     int64
 )
 
-func showVersion(string) error {
+func showVersion(string, string) error {
 	fmt.Printf("  %s version %s\n", progName, version)
 	os.Exit(0)
 	return nil
@@ -84,7 +84,7 @@ var argSpecList = []argInfo{
 	// Again...
 	argInfo{"--no-default-config", argBool, argSetBool(&noDefaultConfig), " Does not use default configuration search path"},
 	// How does it work?
-	argInfo{"--page-number-limit", argStr, argSetStr(&pageNumberLimit), " Set the page number limit (default: 10000)"},
+	argInfo{"--page-number-limit", argInt, argSetInt(&pageNumberLimit), " Set the page number limit (default: 10000)"},
 	argInfo{"--eval", argStr, argSetStr(&evalVal), " Give one line of source text"},
 	argInfo{"--muffler", argStr, argSetStr(&mufflerVal), " Specify muffler color"},
 }

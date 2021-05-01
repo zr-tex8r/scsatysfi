@@ -7,9 +7,11 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -20,27 +22,40 @@ const (
 	argStr
 	argBool
 	argBoolOld
+	argInt
 )
 
 type argInfo struct {
 	key  string
 	spec argSpec
-	proc argProc
+	proc argOptProc
 	doc  string
 }
 
 type argProc func(string) error
 
-func argSetStr(vp *string) argProc {
-	return func(arg string) (err error) {
+type argOptProc func(string, string) error
+
+func argSetStr(vp *string) argOptProc {
+	return func(arg string, opt string) (err error) {
 		*vp = arg
 		return
 	}
 }
 
-func argSetBool(vp *bool) argProc {
-	return func(arg string) (err error) {
+func argSetBool(vp *bool) argOptProc {
+	return func(arg string, opt string) (err error) {
 		*vp = true
+		return
+	}
+}
+
+func argSetInt(vp *int64) argOptProc {
+	return func(arg string, opt string) (err error) {
+		*vp, err = readInt(arg)
+		if err != nil {
+			err = fmt.Errorf("option '%s' expects an integer", opt)
+		}
 		return
 	}
 }
@@ -84,22 +99,22 @@ func argParse(infos []argInfo, anonProc argProc) {
 					switch info.spec {
 					case argVoid:
 						//NB: value is totally ignored
-						if err := info.proc(""); err != nil {
+						if err := info.proc("", key); err != nil {
 							argError(usage, "%v", err)
 						}
-					case argStr:
+					case argStr, argInt:
 						if !valok {
 							if i++; i == lmt {
 								argError(usage, "'%s' needs an argument", key)
 							}
 							val = os.Args[i]
 						}
-						if err := info.proc(val); err != nil {
+						if err := info.proc(val, key); err != nil {
 							argValueError(usage, val, err)
 						}
 					case argBool:
 						//NB: value is totally ignored
-						if err := info.proc(""); err != nil {
+						if err := info.proc("", key); err != nil {
 							argError(usage, "%v", err)
 						}
 					case argBoolOld: // old behabior of Arg.parse??
@@ -108,7 +123,7 @@ func argParse(infos []argInfo, anonProc argProc) {
 							err := fmt.Errorf("option '%s' expects no argument", tok)
 							argValueError(usage, val, err)
 						}
-						if err := info.proc(""); err != nil {
+						if err := info.proc("", key); err != nil {
 							argError(usage, "%v", err)
 						}
 					}
@@ -137,4 +152,60 @@ func argError(usage, f string, arg ...interface{}) {
 	s := fmt.Sprintf(f, arg...)
 	fmt.Fprint(os.Stderr, argProgramName(), ": ", s, ".\n", usage)
 	os.Exit(2)
+}
+
+//--------readInt
+
+var errBadInt = errors.New("bad integer form")
+
+func readInt(s string) (int64, error) {
+	s = strings.Trim(s, " \t\n\f\r")
+	// This is an emulation of OCaml's int_of_string,
+	// where int has 63 bits.
+	neg, sp, base := false, 0, 10
+	switch s[0] {
+	case '+':
+		sp = 1
+	case '-':
+		neg, sp = true, 1
+	}
+	if s[sp] == '0' {
+		switch s[sp+1] {
+		case 'b', 'B':
+			sp += 2
+			base = 2
+		case 'o', 'O':
+			sp += 2
+			base = 8
+		case 'u':
+			sp += 2
+		case 'x', 'X':
+			sp += 2
+			base = 16
+		}
+	}
+	if s[sp] == '_' || s[len(s)-1] == '_' {
+		return 0, errBadInt
+	}
+	s = strings.ReplaceAll(s[sp:], "_", "")
+	v, err := strconv.ParseInt(s, base, 64)
+	if err != nil {
+		return 0, err
+	}
+	if base == 10 && sp < 2 { // no prefix
+		if neg {
+			v = -v
+		}
+		if v < -(1<<62) || (1<<62) <= v {
+			return 0, errBadInt
+		}
+	} else {
+		if v >= (1 << 62) {
+			v = int64(uint64(v) | (1 << 63))
+		}
+		if neg {
+			v = -v
+		}
+	}
+	return v, nil
 }
