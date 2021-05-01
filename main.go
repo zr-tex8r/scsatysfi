@@ -146,8 +146,8 @@ func main() {
 	fmt.Printf("  evaluating texts ...\n")
 
 	if isShowFont {
-		fmt.Printf("  all the available fonts:")
-		fmt.Printf("  ...oops, there's no such inessential concept as font!")
+		fmt.Printf("  all the available fonts:\n")
+		fmt.Printf("  ...oops, there's no such inessential concept!\n")
 	}
 
 	fmt.Printf("  evaluation done.\n")
@@ -206,7 +206,7 @@ func writePdf(ppdf string) {
 
 func readFile(psrc string, value scValue) {
 	fmt.Printf(" ---- ---- ---- ----\n")
-	fmt.Printf("  reading '%s' ...\n", ordInPath(psrc))
+	fmt.Printf("  type checking '%s' ...\n", ordInPath(psrc))
 	fmt.Printf("  type check passed. (%s)\n", value.vtype)
 
 	if !typeCheckOnly && value.vtype != scEssential {
